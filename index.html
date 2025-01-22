@@ -6,9 +6,7 @@
     <title>Document</title>
 </head>
 <body>
-    <div id="grid">
-        <div id="move"></div>
-    </div>
+   <canvas id="map"></canvas>
 </body>
 
 <script>
@@ -16,9 +14,8 @@
 </script>
 <script>
     const map = new Path({
-        size: 400,
-        map: document.getElementById("grid"),
-        moveObj: document.getElementById("move")
+        size: 10,
+        map: document.getElementById("map"),
     });
     map.run()
 </script>

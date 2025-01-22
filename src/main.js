@@ -11,84 +11,131 @@
   class Path {
     constructor(config) {
       this.conf = {
-        map: config.map,
-        moveObj: config.moveObj,
+        canvasMap: config.map,
         size: config.size,
       };
 
       this.state = {
-        lastKey: null,
-        speed: 40,
+        mapGrid: null,
+        cellSize: 40,
         positionX: 0,
         positionY: 0,
       };
-
-      this.setUpControls();
-      this.update();
     }
 
     run() {
-      this.setUpGameStyles();
+      if (!this.conf.canvasMap) return;
+      this.state.mapGrid = this.createMap();
+      const d = this.initCanvasData();
+      this.drawCvs(d);
+      this.setUpControls(d);
     }
 
-    setUpGameStyles() {
-      if (this.conf.map) {
-        const px = `${this.conf.size}px`;
-        this.conf.map.style.width = px;
-        this.conf.map.style.height = px;
-        this.conf.map.style.border = "solid";
-        this.conf.map.style.position = "relative";
-      }
-      if (this.conf.moveObj) {
-        const px = `${this.state.speed}px`;
-        this.conf.moveObj.style.width = px;
-        this.conf.moveObj.style.height = px;
-        this.conf.moveObj.style.background = "red";
-        this.conf.moveObj.style.position = "absolute";
-        this.conf.moveObj.style.transition = "all 0.2s ease";
-      }
+    createMap() {
+      return Array.from({ length: this.conf.size }, (_, i) =>
+        Array.from({ length: this.conf.size }, (_, j) => ({
+          x: i,
+          y: j,
+          value: 0,
+        }))
+      );
     }
 
-    setUpControls() {
-      const bound = this.conf.size - this.state.speed;
-      document.addEventListener("keydown", (e) => {
+    initCanvasData() {
+      const cvs = this.conf.canvasMap;
+      cvs.setAttribute('tabindex','0');
+      cvs.focus();
+      cvs.width = this.conf.size * this.state.cellSize;
+      cvs.height = this.conf.size * this.state.cellSize;
+      const ctx = cvs.getContext("2d");
+      return { cvs, ctx };
+    }
+
+    drawCell(cur, v) {
+      const { ctx } = v;
+      ctx.fillRect(
+        cur.x * this.state.cellSize,
+        cur.y * this.state.cellSize,
+        this.state.cellSize,
+        this.state.cellSize
+      );
+    }
+    drawStroke(cur, v) {
+      const { ctx } = v;
+      ctx.strokeStyle = "black";
+      ctx.lineWidth = 1;
+      ctx.strokeRect(
+        cur.x * this.state.cellSize,
+        cur.y * this.state.cellSize,
+        this.state.cellSize,
+        this.state.cellSize
+      );
+    }
+
+    drawCvs(v) {
+      const { ctx } = v;
+      for (let i = 0; i < this.conf.size; i++) {
+        for (let j = 0; j < this.conf.size; j++) {
+          const cur = this.state.mapGrid[i][j];
+          if (cur === 0) {
+            ctx.fillStyle = "red";
+          } else {
+            ctx.fillStyle = "white";
+          }
+          this.drawCell(cur, v);
+          this.drawStroke(cur, v);
+        }
+      }
+      ctx.fillStyle = "red";
+      this.drawCell({ x: 0, y: 0 }, v);
+    }
+
+    setUpControls(v) {
+      const { cvs } = v;
+      cvs.addEventListener("keydown", (e) => {
         switch (e.key) {
           case Direction.MOVE_UP:
             this.state.positionY = Math.max(
               0,
-              this.state.positionY - this.state.speed
+              this.state.positionY - this.state.cellSize
             );
             break;
           case Direction.MOVE_DOWN:
             this.state.positionY = Math.min(
-              bound,
-              this.state.positionY + this.state.speed
+              cvs.height - this.state.cellSize,
+              this.state.positionY + this.state.cellSize
             );
             break;
           case Direction.MOVE_LEFT:
             this.state.positionX = Math.max(
               0,
-              this.state.positionX - this.state.speed
+              this.state.positionX - this.state.cellSize
             );
             break;
           case Direction.MOVE_RIGHT:
             this.state.positionX = Math.min(
-              bound,
-              this.state.positionX + this.state.speed
+              cvs.width - this.state.cellSize,
+              this.state.positionX + this.state.cellSize
             );
-            console.log(this.state.positionX);
             break;
         }
-        this.update();
+        this.update(v);
       });
     }
 
-    update() {
-      if (this.conf.moveObj) {
-        this.conf.moveObj.style.left = `${this.state.positionX}px`;
-        this.conf.moveObj.style.top = `${this.state.positionY}px`;
-        console.log(this.state.positionX, this.state.positionY);
-      }
+    update(v) {
+      const { ctx } = v;
+      ctx.fillStyle = "red";
+      ctx.fillRect(
+        this.state.positionX,
+        this.state.positionY,
+        this.state.cellSize,
+        this.state.cellSize
+      );
+    }
+
+    dfs() {
+        
     }
   }
 
