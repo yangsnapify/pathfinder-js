@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <div id="grid">
+        <div id="move"></div>
+    </div>
+</body>
+
+<script>
+    document.write("<script src=./src/main.js?" + new Date().getTime() + "><\/script>");
+</script>
+<script>
+    const map = new Path({
+        size: 400,
+        map: document.getElementById("grid"),
+        moveObj: document.getElementById("move")
+    });
+    map.run()
+</script>
+</html>
