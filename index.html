@@ -1,12 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
 </head>
 <body>
-   <canvas id="map"></canvas>
+    <canvas id="map" style="border:1px solid #000;">></canvas>
 </body>
 
 <script>
@@ -14,9 +15,11 @@
 </script>
 <script>
     const map = new Path({
-        size: 10,
+        size: 15,
         map: document.getElementById("map"),
     });
-    map.run()
+    map.run();
+    console.log(map.state.mapGrid)
 </script>
+
 </html>

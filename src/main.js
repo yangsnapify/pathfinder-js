@@ -29,6 +29,8 @@
       const d = this.initCanvasData();
       this.drawCvs(d);
       this.setUpControls(d);
+      this.generateObstacles(d);
+      this.drawObstacles(d);
     }
 
     createMap() {
@@ -36,14 +38,14 @@
         Array.from({ length: this.conf.size }, (_, j) => ({
           x: i,
           y: j,
-          value: 0,
+          value: 1,
         }))
       );
     }
 
     initCanvasData() {
       const cvs = this.conf.canvasMap;
-      cvs.setAttribute('tabindex','0');
+      cvs.setAttribute("tabindex", "0");
       cvs.focus();
       cvs.width = this.conf.size * this.state.cellSize;
       cvs.height = this.conf.size * this.state.cellSize;
@@ -53,23 +55,13 @@
 
     drawCell(cur, v) {
       const { ctx } = v;
-      ctx.fillRect(
-        cur.x * this.state.cellSize,
-        cur.y * this.state.cellSize,
-        this.state.cellSize,
-        this.state.cellSize
-      );
+      ctx.fillRect(cur.x * this.state.cellSize, cur.y * this.state.cellSize, this.state.cellSize, this.state.cellSize);
     }
     drawStroke(cur, v) {
       const { ctx } = v;
       ctx.strokeStyle = "black";
       ctx.lineWidth = 1;
-      ctx.strokeRect(
-        cur.x * this.state.cellSize,
-        cur.y * this.state.cellSize,
-        this.state.cellSize,
-        this.state.cellSize
-      );
+      ctx.strokeRect(cur.x * this.state.cellSize, cur.y * this.state.cellSize, this.state.cellSize, this.state.cellSize);
     }
 
     drawCvs(v) {
@@ -77,17 +69,12 @@
       for (let i = 0; i < this.conf.size; i++) {
         for (let j = 0; j < this.conf.size; j++) {
           const cur = this.state.mapGrid[i][j];
-          if (cur === 0) {
-            ctx.fillStyle = "red";
-          } else {
-            ctx.fillStyle = "white";
-          }
-          this.drawCell(cur, v);
+          ctx.strokeStyle = "#ddd";
           this.drawStroke(cur, v);
         }
       }
-      ctx.fillStyle = "red";
-      this.drawCell({ x: 0, y: 0 }, v);
+      // ctx.fillStyle = "grey";
+      // this.drawCell({ x: 0, y: 0 }, v);
     }
 
     setUpControls(v) {
@@ -95,47 +82,71 @@
       cvs.addEventListener("keydown", (e) => {
         switch (e.key) {
           case Direction.MOVE_UP:
-            this.state.positionY = Math.max(
-              0,
-              this.state.positionY - this.state.cellSize
-            );
+            this.state.positionY = Math.max(0, this.state.positionY - this.state.cellSize);
             break;
           case Direction.MOVE_DOWN:
-            this.state.positionY = Math.min(
-              cvs.height - this.state.cellSize,
-              this.state.positionY + this.state.cellSize
-            );
+            this.state.positionY = Math.min(cvs.height - this.state.cellSize, this.state.positionY + this.state.cellSize);
             break;
           case Direction.MOVE_LEFT:
-            this.state.positionX = Math.max(
-              0,
-              this.state.positionX - this.state.cellSize
-            );
+            this.state.positionX = Math.max(0, this.state.positionX - this.state.cellSize);
             break;
           case Direction.MOVE_RIGHT:
-            this.state.positionX = Math.min(
-              cvs.width - this.state.cellSize,
-              this.state.positionX + this.state.cellSize
-            );
+            this.state.positionX = Math.min(cvs.width - this.state.cellSize, this.state.positionX + this.state.cellSize);
             break;
         }
-        this.update(v);
+        // this.update(v);
       });
     }
 
     update(v) {
       const { ctx } = v;
       ctx.fillStyle = "red";
-      ctx.fillRect(
-        this.state.positionX,
-        this.state.positionY,
-        this.state.cellSize,
-        this.state.cellSize
-      );
+      ctx.fillRect(this.state.positionX, this.state.positionY, this.state.cellSize, this.state.cellSize);
     }
 
-    dfs() {
-        
+    ensureWallConnectivity(x, y, direction) {
+
+    }
+
+    generateObstacles(v) {
+      const that = this;
+      const { ctx } = v;
+
+      function _dfs(x, y) {
+        that.state.mapGrid[x][y].value = 0;
+
+        const directions = [
+          [0, 2],
+          [0, -2],
+          [2, 0],
+          [-2, 0],
+        ].sort(() => Math.random() - 0.5);
+
+        for (let [dx, dy] of directions) {
+          const newX = x + dx;
+          const newY = y + dy;
+          if (newX >= 0 && newX < that.conf.size && newY >= 0 && newY < that.conf.size && that.state.mapGrid[newX][newY].value === 1) {
+            that.state.mapGrid[Math.floor(x + dx / 2)][Math.floor(y + dy / 2)].value = 0;
+            console.log('row', `${x},${y}`, "direction", `${dx},${dy}`, "newxy", `${newX},${newY}`);
+            ctx.fillStyle = "gray";
+            ctx.fillRect(newX * that.state.cellSize, newY * that.state.cellSize, that.state.cellSize, that.state.cellSize);
+            _dfs(newX, newY);
+          }
+        }
+      }
+      _dfs(1, 1);
+    }
+
+    drawObstacles(v) {
+      const { ctx } = v;
+      for (let i = 0; i < this.conf.size; i++) {
+        for (let j = 0; j < this.conf.size; j++) {
+          if (this.state.mapGrid[i][j].value === 0) {
+            ctx.fillStyle = "gray";
+            ctx.fillRect(i * this.state.cellSize, j * this.state.cellSize, this.state.cellSize, this.state.cellSize);
+          }
+        }
+      }
     }
   }
 
