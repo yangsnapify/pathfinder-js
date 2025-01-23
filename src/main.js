@@ -104,10 +104,6 @@
       ctx.fillRect(this.state.positionX, this.state.positionY, this.state.cellSize, this.state.cellSize);
     }
 
-    ensureWallConnectivity(x, y, direction) {
-
-    }
-
     generateObstacles(v) {
       const that = this;
       const { ctx } = v;
@@ -128,8 +124,6 @@
           if (newX >= 0 && newX < that.conf.size && newY >= 0 && newY < that.conf.size && that.state.mapGrid[newX][newY].value === 1) {
             that.state.mapGrid[Math.floor(x + dx / 2)][Math.floor(y + dy / 2)].value = 0;
             console.log('row', `${x},${y}`, "direction", `${dx},${dy}`, "newxy", `${newX},${newY}`);
-            ctx.fillStyle = "gray";
-            ctx.fillRect(newX * that.state.cellSize, newY * that.state.cellSize, that.state.cellSize, that.state.cellSize);
             _dfs(newX, newY);
           }
         }
