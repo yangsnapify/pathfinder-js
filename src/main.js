@@ -1,6 +1,11 @@
 (function (global) {
   const isNode = typeof window === "undefined";
 
+  const COLOR = {
+    GRAY: "gray",
+    BLACK: "BLACK"
+  }
+
   const Direction = {
     MOVE_UP: "ArrowUp",
     MOVE_DOWN: "ArrowDown",
@@ -106,7 +111,7 @@
     }
     drawStroke(cur, v) {
       const { ctx } = v;
-      ctx.strokeStyle = "black";
+      ctx.strokeStyle = COLOR.BLACK;
       ctx.lineWidth = 1;
       ctx.strokeRect(cur.x * this.state.cellSize, cur.y * this.state.cellSize, this.state.cellSize, this.state.cellSize);
     }
@@ -148,7 +153,7 @@
 
         function _rmv() {
           ctx.clearRect(prevX, prevY, that.state.cellSize, that.state.cellSize);
-          ctx.fillStyle = "gray";
+          ctx.fillStyle = COLOR.GRAY;
           that.drawCell({ x: that.state.positionX, y: that.state.positionY }, v);
         }
 
@@ -209,7 +214,7 @@
       for (let i = 0; i < this.conf.size; i++) {
         for (let j = 0; j < this.conf.size; j++) {
           if (this.state.mapGrid[i][j].value === 0) {
-            ctx.fillStyle = "gray";
+            ctx.fillStyle = COLOR.GRAY;
             ctx.fillRect(i * this.state.cellSize, j * this.state.cellSize, this.state.cellSize, this.state.cellSize);
           }
         }
