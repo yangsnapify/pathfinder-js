@@ -62,7 +62,7 @@
       const d = this.initCanvasData();
       this.saveGameState();
       this.clearCvs(d);
-  
+
       if (this.state.currentGameMode.id === PLAY_MODE.BATTLE_MAZE.id) {
         this.state.mapGrid = this.createMap();
         this.drawCvs(d);
@@ -122,31 +122,50 @@
 
     setUpControls(v) {
       const { cvs, ctx } = v;
+      const that = this;
+
+      function _checkPos(nextValue, direction, clearPrevPlayerPos) {
+        let val;
+        if ([Direction.MOVE_UP, Direction.MOVE_DOWN].includes(direction)) {
+          val = [that.state.positionX, nextValue]
+        }
+        if ([Direction.MOVE_LEFT, Direction.MOVE_RIGHT].includes(direction)) {
+          val = [nextValue, that.state.positionY]
+        }
+
+        const [nx, ny] = val;
+        if (that.state.mapGrid[nx][ny].value === 1) return;
+
+        clearPrevPlayerPos();
+        that.state.positionX = nx;
+        that.state.positionY = ny;
+        that.updatePlayerPos(v);
+      }
 
       cvs.addEventListener("keydown", (e) => {
         const prevX = this.state.positionX * this.state.cellSize;
         const prevY = this.state.positionY * this.state.cellSize;
 
-        // Clear Previous Arc Position
-        ctx.clearRect(prevX, prevY, this.state.cellSize, this.state.cellSize);
-        ctx.fillStyle = "gray";
-        this.drawCell({ x: this.state.positionX, y: this.state.positionY }, v);
+        function _rmv() {
+          ctx.clearRect(prevX, prevY, that.state.cellSize, that.state.cellSize);
+          ctx.fillStyle = "gray";
+          that.drawCell({ x: that.state.positionX, y: that.state.positionY }, v);
+        }
 
         switch (e.key) {
           case Direction.MOVE_UP:
-            this.state.positionY = Math.max(0, this.state.positionY - 1);
+            _checkPos(Math.max(0, this.state.positionY - 1), e.key, _rmv);
             break;
           case Direction.MOVE_DOWN:
-            this.state.positionY = Math.min(this.conf.size - 1, this.state.positionY + 1);
+            _checkPos(Math.min(this.conf.size - 1, this.state.positionY + 1), e.key, _rmv);
             break;
           case Direction.MOVE_LEFT:
-            this.state.positionX = Math.max(0, this.state.positionX - 1);
+            _checkPos(Math.max(0, this.state.positionX - 1), e.key, _rmv);
             break;
           case Direction.MOVE_RIGHT:
-            this.state.positionX = Math.min(this.conf.size - 1, this.state.positionX + 1);
+            _checkPos(Math.min(this.conf.size - 1, this.state.positionX + 1), e.key, _rmv);
             break;
         }
-        this.updatePlayerPos(v);
       });
     }
 
