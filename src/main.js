@@ -8,6 +8,24 @@
     MOVE_RIGHT: "ArrowRight",
   };
 
+  const GAME_ITEMS = {
+    FREEZE: "FREEZE",
+    BOOST: "BOOST"
+  }
+
+  const PLAY_MODE = {
+    TIMER_MAZE: {
+      id: "TIMER_MAZE",
+      init: () => 1,
+      pos: { x: 1, y: 1 }
+    },
+    BATTLE_MAZE: {
+      id: "BATTLE_MAZE",
+      init: (x, y) => x % 2 === 0 || y % 2 === 0 ? 0 : 1,
+      pos: { x: 0, y: 0 }
+    }
+  }
+
   class Path {
     constructor(config) {
       this.conf = {
@@ -17,28 +35,57 @@
 
       this.state = {
         mapGrid: null,
+        currentGameMode: PLAY_MODE.BATTLE_MAZE,
         cellSize: 40,
         positionX: 0,
         positionY: 0,
+        cache: new Map()
       };
+    }
+
+    clearCvs(d) {
+      const { cvs, ctx } = d;
+      ctx.clearRect(0, 0, cvs.width, cvs.height);
+    }
+
+    saveGameState() {
+      const _gameState = {
+        currentMapGrid: this.state.mapGrid,
+        currentPlayerX: this.state.positionX,
+        currentPlayerY: this.state.positionY
+      }
+      this.state.cache.set(`${this.state.currentGameMode.id}_${new Date().getTime()}`, _gameState);
     }
 
     run() {
       if (!this.conf.canvasMap) return;
-      this.state.mapGrid = this.createMap();
       const d = this.initCanvasData();
-      this.drawCvs(d);
-      this.setUpControls(d);
-      this.generateObstacles(d);
-      this.drawObstacles(d);
+      this.saveGameState();
+      this.clearCvs(d);
+  
+      if (this.state.currentGameMode.id === PLAY_MODE.BATTLE_MAZE.id) {
+        this.state.mapGrid = this.createMap();
+        this.drawCvs(d);
+        this.setUpControls(d);
+        this.drawObstacles(d);
+        this.updatePlayerPos(d);
+      }
+
+      if (this.state.currentGameMode.id === PLAY_MODE.TIMER_MAZE.id) {
+        this.state.mapGrid = this.createMap();
+        this.drawCvs(d);
+        this.generateTimerMaze(d);
+      }
     }
 
     createMap() {
+      const { init } = this.state.currentGameMode;
+
       return Array.from({ length: this.conf.size }, (_, i) =>
         Array.from({ length: this.conf.size }, (_, j) => ({
           x: i,
           y: j,
-          value: 1,
+          value: init(i, j),
         }))
       );
     }
@@ -65,48 +112,54 @@
     }
 
     drawCvs(v) {
-      const { ctx } = v;
       for (let i = 0; i < this.conf.size; i++) {
         for (let j = 0; j < this.conf.size; j++) {
           const cur = this.state.mapGrid[i][j];
-          ctx.strokeStyle = "#ddd";
           this.drawStroke(cur, v);
         }
       }
-      // ctx.fillStyle = "grey";
-      // this.drawCell({ x: 0, y: 0 }, v);
     }
 
     setUpControls(v) {
-      const { cvs } = v;
+      const { cvs, ctx } = v;
+
       cvs.addEventListener("keydown", (e) => {
+        const prevX = this.state.positionX * this.state.cellSize;
+        const prevY = this.state.positionY * this.state.cellSize;
+
+        // Clear Previous Arc Position
+        ctx.clearRect(prevX, prevY, this.state.cellSize, this.state.cellSize);
+        ctx.fillStyle = "gray";
+        this.drawCell({ x: this.state.positionX, y: this.state.positionY }, v);
+
         switch (e.key) {
           case Direction.MOVE_UP:
-            this.state.positionY = Math.max(0, this.state.positionY - this.state.cellSize);
+            this.state.positionY = Math.max(0, this.state.positionY - 1);
             break;
           case Direction.MOVE_DOWN:
-            this.state.positionY = Math.min(cvs.height - this.state.cellSize, this.state.positionY + this.state.cellSize);
+            this.state.positionY = Math.min(this.conf.size - 1, this.state.positionY + 1);
             break;
           case Direction.MOVE_LEFT:
-            this.state.positionX = Math.max(0, this.state.positionX - this.state.cellSize);
+            this.state.positionX = Math.max(0, this.state.positionX - 1);
             break;
           case Direction.MOVE_RIGHT:
-            this.state.positionX = Math.min(cvs.width - this.state.cellSize, this.state.positionX + this.state.cellSize);
+            this.state.positionX = Math.min(this.conf.size - 1, this.state.positionX + 1);
             break;
         }
-        // this.update(v);
+        this.updatePlayerPos(v);
       });
     }
 
-    update(v) {
+    updatePlayerPos(v) {
       const { ctx } = v;
       ctx.fillStyle = "red";
-      ctx.fillRect(this.state.positionX, this.state.positionY, this.state.cellSize, this.state.cellSize);
+      ctx.beginPath();
+      ctx.arc(this.state.positionX * this.state.cellSize + this.state.cellSize / 2, this.state.positionY * this.state.cellSize + this.state.cellSize / 2, 10, 0, 2 * Math.PI);
+      ctx.fill();
     }
 
-    generateObstacles(v) {
+    generateTimerMaze(v) {
       const that = this;
-      const { ctx } = v;
 
       function _dfs(x, y) {
         that.state.mapGrid[x][y].value = 0;
@@ -123,12 +176,13 @@
           const newY = y + dy;
           if (newX >= 0 && newX < that.conf.size && newY >= 0 && newY < that.conf.size && that.state.mapGrid[newX][newY].value === 1) {
             that.state.mapGrid[Math.floor(x + dx / 2)][Math.floor(y + dy / 2)].value = 0;
-            console.log('row', `${x},${y}`, "direction", `${dx},${dy}`, "newxy", `${newX},${newY}`);
+            // console.log("row", `${x},${y}`, "direction", `${dx},${dy}`, "newxy", `${newX},${newY}`);
             _dfs(newX, newY);
           }
         }
       }
       _dfs(1, 1);
+      this.drawObstacles(v)
     }
 
     drawObstacles(v) {
