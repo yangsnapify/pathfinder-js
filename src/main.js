@@ -3,10 +3,11 @@
 
   const COLOR = {
     GRAY: "gray",
-    BLACK: "BLACK"
+    BLACK: "black",
+    RED: "red"
   }
 
-  const Direction = {
+  const DIRECTION = {
     MOVE_UP: "ArrowUp",
     MOVE_DOWN: "ArrowDown",
     MOVE_LEFT: "ArrowLeft",
@@ -129,12 +130,12 @@
       const { cvs, ctx } = v;
       const that = this;
 
-      function _checkPos(nextValue, direction, clearPrevPlayerPos) {
+      function _checkPos(nextValue, di, clearPrevPlayerPos) {
         let val;
-        if ([Direction.MOVE_UP, Direction.MOVE_DOWN].includes(direction)) {
+        if ([DIRECTION.MOVE_UP, DIRECTION.MOVE_DOWN].includes(di)) {
           val = [that.state.positionX, nextValue]
         }
-        if ([Direction.MOVE_LEFT, Direction.MOVE_RIGHT].includes(direction)) {
+        if ([DIRECTION.MOVE_LEFT, DIRECTION.MOVE_RIGHT].includes(di)) {
           val = [nextValue, that.state.positionY]
         }
 
@@ -158,16 +159,16 @@
         }
 
         switch (e.key) {
-          case Direction.MOVE_UP:
+          case DIRECTION.MOVE_UP:
             _checkPos(Math.max(0, this.state.positionY - 1), e.key, _rmv);
             break;
-          case Direction.MOVE_DOWN:
+          case DIRECTION.MOVE_DOWN:
             _checkPos(Math.min(this.conf.size - 1, this.state.positionY + 1), e.key, _rmv);
             break;
-          case Direction.MOVE_LEFT:
+          case DIRECTION.MOVE_LEFT:
             _checkPos(Math.max(0, this.state.positionX - 1), e.key, _rmv);
             break;
-          case Direction.MOVE_RIGHT:
+          case DIRECTION.MOVE_RIGHT:
             _checkPos(Math.min(this.conf.size - 1, this.state.positionX + 1), e.key, _rmv);
             break;
         }
@@ -176,7 +177,7 @@
 
     updatePlayerPos(v) {
       const { ctx } = v;
-      ctx.fillStyle = "red";
+      ctx.fillStyle = COLOR.RED;
       ctx.beginPath();
       ctx.arc(this.state.positionX * this.state.cellSize + this.state.cellSize / 2, this.state.positionY * this.state.cellSize + this.state.cellSize / 2, 10, 0, 2 * Math.PI);
       ctx.fill();
@@ -188,19 +189,19 @@
       function _dfs(x, y) {
         that.state.mapGrid[x][y].value = 0;
 
-        const directions = [
+        const edges = [
           [0, 2],
           [0, -2],
           [2, 0],
           [-2, 0],
         ].sort(() => Math.random() - 0.5);
 
-        for (let [dx, dy] of directions) {
+        for (let [dx, dy] of edges) {
           const newX = x + dx;
           const newY = y + dy;
           if (newX >= 0 && newX < that.conf.size && newY >= 0 && newY < that.conf.size && that.state.mapGrid[newX][newY].value === 1) {
             that.state.mapGrid[Math.floor(x + dx / 2)][Math.floor(y + dy / 2)].value = 0;
-            // console.log("row", `${x},${y}`, "direction", `${dx},${dy}`, "newxy", `${newX},${newY}`);
+            // console.log("row", `${x},${y}`, "edges", `${dx},${dy}`, "newxy", `${newX},${newY}`);
             _dfs(newX, newY);
           }
         }
