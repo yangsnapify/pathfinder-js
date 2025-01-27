@@ -1,4 +1,4 @@
-import { COLOR } from "@/js/core/main.js";
+import { CONFIG } from "@/const/gameConfig";
 
 class Player {
     constructor(color, ctx, px, py, cellSize) {
@@ -22,7 +22,7 @@ class Player {
         const prevY = y * this._cellSize;
 
         ctx.clearRect(prevX, prevY, this._cellSize, this._cellSize);
-        ctx.fillStyle = COLOR.GRAY;
+        ctx.fillStyle = CONFIG.COLORS.GRAY;
         ctx.fillRect(x * this._cellSize, y * this._cellSize, this._cellSize, this._cellSize);
     }
 }
