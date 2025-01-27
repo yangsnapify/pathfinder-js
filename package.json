@@ -1,0 +1,22 @@
+{
+  "name": "pathfinder",
+  "type": "module",
+  "version": "1.0.0",
+  "description": "Face dynamic battles where penalties thrust you into dark, shifting mazes. With limited vision, outsmart a relentless AI hunter, race against the clock, and collect items to survive. Can you conquer the arena and escape the shadows?",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "webpack serve",
+    "build": "webpack build"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "webpack": "^5.97.1",
+    "webpack-cli": "^6.0.1",
+    "webpack-dev-server": "^5.2.0"
+  },
+  "dependencies": {
+    "html-webpack-plugin": "^5.6.3"
+  }
+}
