@@ -5,6 +5,7 @@ class Bullet {
         this.angle = angle;
         this.speed = 5;
         this.isDestroy = false;
+        this.bounceCount = 0;
 
         this.dx = Math.cos(angle) * this.speed;
         this.dy = Math.sin(angle) * this.speed;
@@ -21,6 +22,12 @@ class Bullet {
         ctx.fillStyle = "yellow";
         ctx.fill();
         ctx.closePath();
+    }
+
+    setAngle(newAngle) {
+        this.angle = newAngle;
+        this.dx = Math.cos(newAngle) * this.speed;
+        this.dy = Math.sin(newAngle) * this.speed;        
     }
 
     destroy() {
