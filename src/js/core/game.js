@@ -20,8 +20,7 @@ class Game {
         this.gameState.bulletManager = new BulletManager(
             this.canvasManager.ctx,
             this.gameState.gameSize,
-            this.gameState.gameSize
-        );
+            this.gameState.gameSize        );
 
         this.gameState.player = new Player(
             CONFIG.COLORS.RED,
@@ -56,13 +55,14 @@ class Game {
             this.gameState.positionY
         );
 
-        this.gameState.bulletManager.update(
-            this.canvasManager.ctx,
-            this.gameState.gameSize,
-            this.gameState.gameSize
-        );
+        this.gameState.bulletManager.update();
+        this.drawFire()
 
         requestAnimationFrame(this.gameLoop);
+    }
+
+    drawFire() {
+        this.canvasManager.drawFire(1, 3)
     }
 
     drawMap() {

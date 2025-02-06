@@ -30,6 +30,15 @@ class CanvasManager {
         );
     }
 
+    drawFire(x, y) {
+        this.ctx.font = "38px Arial";
+        this.ctx.fillText(
+            "🔥",
+            x * this.cellSize - 5,
+            y * this.cellSize - 7,
+        );
+    }
+
     drawStroke(x, y) {
         this.ctx.strokeStyle = CONFIG.COLORS.BLACK;
         this.ctx.lineWidth = 1;
