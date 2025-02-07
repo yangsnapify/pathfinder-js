@@ -5,6 +5,8 @@ import MazeGenerator from "@/js/modules/mazeGenerator"
 import BulletManager from "@/js/modules/bulletManager"
 import Player from "@/js/modules/player"
 import InputHandler from "@/js/modules/inputHandler"
+import ItemsManager from "@/js/modules/itemsManager";
+import { GAME_ITEMS } from "@/const/gameConfig";
 
 class Game {
     constructor(config) {
@@ -12,6 +14,7 @@ class Game {
         this.canvasManager = new CanvasManager(config.map, config.size, this.gameState.cellSize);
         this.mazeGenerator = new MazeGenerator(config.size);
         this.gameLoop = this.gameLoop.bind(this);
+        this.itemsManager = new ItemsManager(config);
     }
 
     run() {
@@ -20,7 +23,7 @@ class Game {
         this.gameState.bulletManager = new BulletManager(
             this.canvasManager.ctx,
             this.gameState.gameSize,
-            this.gameState.gameSize        );
+            this.gameState.gameSize);
 
         this.gameState.player = new Player(
             CONFIG.COLORS.RED,
@@ -31,9 +34,8 @@ class Game {
         );
 
         if (this.gameState.currentGameMode.id === CONFIG.PLAY_MODE.BATTLE_MAZE.id) {
-            this.gameState.mapGrid = this.mazeGenerator.createMap(
-                this.gameState.currentGameMode.init
-            );
+            this.gameState.mapGrid = this.mazeGenerator.createMap(this.gameState.currentGameMode.init);
+            this.itemsManager.run(this.gameState.mapGrid, this.gameState.currentGameMode);
 
             this.inputHandler = new InputHandler(
                 this.canvasManager.canvas,
@@ -48,7 +50,7 @@ class Game {
     gameLoop() {
         this.canvasManager.clear();
         this.drawMap();
-        this.drawObstacles();
+        this.drawItems();
 
         this.gameState.player.update(
             this.gameState.positionX,
@@ -56,13 +58,7 @@ class Game {
         );
 
         this.gameState.bulletManager.update();
-        this.drawFire()
-
         requestAnimationFrame(this.gameLoop);
-    }
-
-    drawFire() {
-        this.canvasManager.drawFire(1, 3)
     }
 
     drawMap() {
@@ -73,11 +69,14 @@ class Game {
         }
     }
 
-    drawObstacles() {
+    drawItems() {
         for (let i = 0; i < this.gameState.size; i++) {
             for (let j = 0; j < this.gameState.size; j++) {
                 if (this.gameState.mapGrid[i][j].value === 0) {
                     this.canvasManager.drawCell(i, j, CONFIG.COLORS.GRAY);
+                }
+                if (this.gameState.mapGrid[i][j].value === GAME_ITEMS.FIRE) {
+                    this.canvasManager.drawFire(i, j);
                 }
             }
         }

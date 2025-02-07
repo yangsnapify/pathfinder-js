@@ -32,10 +32,11 @@ class CanvasManager {
 
     drawFire(x, y) {
         this.ctx.font = "38px Arial";
+        this.drawCell(x, y, CONFIG.COLORS.GRAY)
         this.ctx.fillText(
             "🔥",
             x * this.cellSize - 5,
-            y * this.cellSize - 7,
+            y * this.cellSize + 32,
         );
     }
 

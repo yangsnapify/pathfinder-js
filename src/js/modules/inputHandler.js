@@ -1,4 +1,5 @@
 import { CONFIG } from "@/const/gameConfig";
+import { GAME_ITEMS } from "@/const/gameConfig";
 
 class InputHandler {
     constructor(canvas, gameState, player) {
@@ -56,7 +57,7 @@ class InputHandler {
             newX < this.gameState.size &&
             newY >= 0 &&
             newY < this.gameState.size &&
-            this.gameState.mapGrid[newX][newY].value !== 1
+            this.gameState.mapGrid[newX][newY].value !== GAME_ITEMS.OBSTACLE
         ) {
             this.player.clear(this.gameState.positionX, this.gameState.positionY);
             this.gameState.positionX = newX;

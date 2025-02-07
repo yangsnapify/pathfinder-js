@@ -7,10 +7,10 @@ class FireItem {
         this.isCollected = false;
     }
 
-    draw(ctx) {
+    static draw(x, y, ctx) {
         if (!this.isCollected) {
             ctx.fillStyle = "red";
-            ctx.fillRect(this.x, this.y, this.width, this.height);
+            ctx.fillRect(x, y, this.width, this.height);
         }
     }
 }
